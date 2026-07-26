@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun add *)",
+      "Bash(bun run *)",
+      "Bash(bunx tsc *)",
+      "Bash(pkill -f \"vite$\")",
+      "Bash(pkill -f \"bun run dev\")",
+      "WebFetch(domain:bestyoustudio.com.br)",
+      "Bash(curl -s -o /dev/null -w \"5174: %{http_code}\\\\n\" http://localhost:5174/)",
+      "Bash(pgrep -fa \"vite$|bun run dev\")"
+    ]
+  }
+}

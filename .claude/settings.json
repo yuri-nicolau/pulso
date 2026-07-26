@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sed -i 's#\\\\.\\\\./\\\\.\\\\./assets/marca-#../../assets/optimized/marca-#; ' src/components/ui/PulseOrb.tsx)",
+      "Bash(sed -i 's#\\\\.\\\\./\\\\.\\\\./assets/marca-#../../assets/optimized/marca-#' src/components/sections/Header.tsx)",
+      "Bash(sed -i 's#\\\\.\\\\./\\\\.\\\\./assets/marca-#../../assets/optimized/marca-#' src/components/sections/Hero.tsx)",
+      "Bash(sed -i 's#\\\\.\\\\./\\\\.\\\\./assets/logo-#../../assets/optimized/logo-#' src/components/sections/Footer.tsx)"
+    ]
+  }
+}
