@@ -6,6 +6,7 @@ import {
   Info,
   Loader2,
   MessageCircle,
+  RotateCcw,
 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import type { LucideIcon } from "lucide-react";
@@ -50,6 +51,9 @@ const INTEREST_ICONS: Record<Interest, LucideIcon> = {
   academia: Dumbbell,
   "os-dois": Combine,
 };
+
+const whatsappButtonClasses =
+  "inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-8 py-4 text-base font-medium text-white transition-all duration-300 will-change-transform hover:scale-[1.03] hover:border-orange-500 hover:bg-white/10 active:scale-[0.96] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-500";
 
 type CompleteFormState = FormState & { interest: Interest };
 
@@ -177,6 +181,30 @@ export function ContactForm() {
                   Nossa equipe vai entrar em contato em breve para agendar sua
                   aula experimental.
                 </p>
+
+                <div className="mt-4 flex w-full flex-col gap-3">
+                  <a
+                    href={getWhatsAppUrl()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={whatsappButtonClasses}
+                  >
+                    <MessageCircle className="h-5 w-5" strokeWidth={1.75} />
+                    Falar no WhatsApp agora
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStatus("idle");
+                      setErrorMessage("");
+                    }}
+                    className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-sand-100/60 transition-colors duration-200 hover:text-white"
+                  >
+                    <RotateCcw className="h-4 w-4" strokeWidth={1.75} />
+                    Enviar outra resposta
+                  </button>
+                </div>
               </div>
             ) : (
               <form
@@ -357,7 +385,7 @@ export function ContactForm() {
                   href={getWhatsAppUrl()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-8 py-4 text-base font-medium text-white transition-all duration-300 will-change-transform hover:scale-[1.03] hover:border-orange-500 hover:bg-white/10 active:scale-[0.96] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-500"
+                  className={whatsappButtonClasses}
                 >
                   <MessageCircle className="h-5 w-5" strokeWidth={1.75} />
                   Falar no WhatsApp agora
