@@ -90,7 +90,7 @@ export function Hero() {
           className="mt-10 flex justify-center"
         >
           <a href="#contato" className={getButtonClasses("primary", "lg")}>
-            Agende sua aula experimental
+            Quero ser contatado
           </a>
         </motion.div>
       </motion.div>
