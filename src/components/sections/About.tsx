@@ -47,7 +47,7 @@ export function About() {
               Mais do que um lugar para treinar.
             </h2>
             <p className="mt-6 text-ink-muted">
-              A Pulso Concept é um estúdio boutique de treinamento que une
+              A Pulso Concept é um estúdio premium de treinamento que une
               performance, saúde e bem-estar em um ambiente moderno,
               acolhedor e exclusivo. Trabalhamos com grupos reduzidos para
               oferecer acompanhamento próximo, correções individuais e um

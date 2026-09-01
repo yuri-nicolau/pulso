@@ -1,7 +1,7 @@
 # Projeto: Pulso Concept - Landing Page
 
 ## 1. Visão Geral
-Este projeto é uma landing page (Single Page Application) de alta conversão para o estúdio boutique de treinamento "Pulso Concept". O objetivo é transmitir um ambiente moderno, acolhedor e com atendimento humanizado, focando na união de saúde, performance e bem-estar.
+Este projeto é uma landing page (Single Page Application) de alta conversão para o estúdio premium de treinamento "Pulso Concept". O objetivo é transmitir um ambiente moderno, acolhedor e com atendimento humanizado, focando na união de saúde, performance e bem-estar.
 
 ## 2. Stack Tecnológica e Ferramentas
 - **Gerenciador de Pacotes e Runtime:** Bun
