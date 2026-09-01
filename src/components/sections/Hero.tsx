@@ -51,7 +51,7 @@ export function Hero() {
           transition={{ duration: 0.6, ease: easeOut }}
           className="inline-block rounded-full border border-orange-400/40 bg-orange-500/10 px-4 py-1 text-xs font-medium uppercase tracking-[0.2em] text-orange-300 backdrop-blur-sm"
         >
-          Estúdio Premium de Treinamento
+          Studio Premium de Treinamento
         </motion.span>
 
         <h1 className="mt-6 font-display text-hero font-medium text-white">
@@ -79,7 +79,7 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.4, ease: easeOut }}
           className="mx-auto mt-6 max-w-2xl text-base text-sand-100/90 sm:text-lg"
         >
-          Um estúdio premium onde saúde, força e performance se encontram em
+          Um Studio premium onde saúde, força e performance se encontram em
           uma experiência personalizada.
         </motion.p>
 

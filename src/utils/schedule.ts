@@ -40,7 +40,7 @@ export const CLASS_TYPE_INFO: Record<
   "funcional-teen": { label: "Funcional Teen", dotClassName: "bg-green-500" },
 };
 
-// Espelha a divisão de espaços do estúdio (Sala Funcional x Sala de
+// Espelha a divisão de espaços do Studio (Sala Funcional x Sala de
 // Musculação — ver components/sections/Spaces.tsx): cada interesse declarado
 // no formulário libera apenas os tipos de treino daquele espaço.
 export const INTEREST_CLASS_TYPES: Record<Interest, ClassType[]> = {
@@ -65,7 +65,7 @@ export const FREQUENCY_OPTIONS = [
   { value: "5x+", label: "5x+" },
 ] as const;
 
-// Grade semanal — mantida em sincronia com o material de horários do estúdio.
+// Grade semanal — mantida em sincronia com o material de horários do Studio.
 export const SCHEDULE: ScheduleSlot[] = [
   // Segunda
   { day: "segunda", time: "06:00", type: "funcional" },
