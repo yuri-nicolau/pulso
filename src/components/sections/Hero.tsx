@@ -2,6 +2,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { useRef } from "react";
 import marcaBranco from "../../assets/optimized/marca-branco.png";
+import heroBg from "../../assets/photos/hero-bg.jpg";
 import { getButtonClasses } from "../ui/Button";
 
 const easeOut = [0.16, 1, 0.3, 1] as const;
@@ -27,8 +28,7 @@ export function Hero() {
         className="absolute inset-0 bg-cover bg-center scale-110"
         style={{
           y: imageY,
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&w=1920&q=80')",
+          backgroundImage: `url(${heroBg})`,
         }}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/70 to-ink/30" />
