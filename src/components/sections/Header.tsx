@@ -1,7 +1,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, MessageCircle, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import marcaLaranja from "../../assets/optimized/marca-laranja.png";
+import logoExtensoClaro from "../../assets/optimized/logo-extenso03.png";
+import logoExtensoEscuro from "../../assets/optimized/logo-extenso01.png";
 import { getWhatsAppUrl } from "../../utils/whatsapp";
 import { getButtonClasses } from "../ui/Button";
 
@@ -37,25 +38,31 @@ export function Header() {
       }`}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-4">
-        <a href="#hero" className="group flex shrink-0 items-center gap-2.5">
+        {/* Mesma logo do footer. Sobre o hero escuro usamos a versão com
+            "CONCEPT" em branco; quando o header fica sólido, a versão
+            escura aparece por cima com fade, acompanhando a transição de
+            fundo sem piscar na troca de src. */}
+        <a href="#hero" className="relative block shrink-0">
           <img
-            src={marcaLaranja}
-            alt=""
-            className="h-8 w-8 shrink-0 transition-transform duration-300 group-hover:rotate-[20deg]"
+            src={logoExtensoClaro}
+            alt="Pulso Concept"
+            className="h-auto w-44 sm:h-6 sm:w-auto"
           />
-          <span
-            className={`whitespace-nowrap font-display text-sm font-semibold uppercase tracking-[0.2em] transition-colors ${
-              isSolid ? "text-ink" : "text-white"
+          <img
+            src={logoExtensoEscuro}
+            alt=""
+            aria-hidden="true"
+            className={`absolute inset-0 h-full w-full transition-opacity duration-300 ${
+              isSolid ? "opacity-100" : "opacity-0"
             }`}
-          >
-            Pulso Concept
-          </span>
+          />
         </a>
 
-        {/* Os links de navegação só voltam em lg+ — em telas médias (tablet)
-            eles ficam dentro do menu hambúrguer, dando lugar aos dois botões
-            de ação (WhatsApp + Contato), que são a prioridade de conversão. */}
-        <nav className="hidden items-center gap-8 lg:flex">
+        {/* Os links de navegação só voltam em xl+ — abaixo disso eles ficam
+            dentro do menu hambúrguer, dando lugar aos dois botões de ação
+            (WhatsApp + Contato), que são a prioridade de conversão. A logo
+            extensa + 6 links + os dois botões não cabem juntos em lg. */}
+        <nav className="hidden items-center gap-6 xl:flex">
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
@@ -85,7 +92,8 @@ export function Header() {
             }`}
           >
             <MessageCircle size={18} strokeWidth={1.75} />
-            <span className="hidden lg:inline">WhatsApp</span>
+            {/* Rótulo só em lg; em xl os links ocupam o espaço e fica só o ícone. */}
+            <span className="hidden lg:inline xl:hidden">WhatsApp</span>
           </a>
 
           <a
@@ -100,7 +108,7 @@ export function Header() {
           type="button"
           aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
           onClick={() => setIsMenuOpen((open) => !open)}
-          className={`shrink-0 lg:hidden ${isSolid ? "text-ink" : "text-white"}`}
+          className={`shrink-0 xl:hidden ${isSolid ? "text-ink" : "text-white"}`}
         >
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -113,7 +121,7 @@ export function Header() {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden border-t border-ink/10 bg-white lg:hidden"
+            className="overflow-hidden border-t border-ink/10 bg-white xl:hidden"
           >
             <div className="flex flex-col gap-1 px-6 py-4">
               {NAV_LINKS.map((link) => (
