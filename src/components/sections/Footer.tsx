@@ -5,7 +5,6 @@ const NAV_LINKS = [
   { href: "#ambientes", label: "Ambientes" },
   { href: "#diferenciais", label: "Diferenciais" },
   { href: "#equipe", label: "Equipe" },
-  { href: "#galeria", label: "Galeria" },
   { href: "#depoimentos", label: "Depoimentos" },
   { href: "#contato", label: "Contato" },
 ];

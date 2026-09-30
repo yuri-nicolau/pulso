@@ -2,7 +2,6 @@ import { About } from "./components/sections/About";
 import { ContactForm } from "./components/sections/ContactForm";
 import { Features } from "./components/sections/Features";
 import { Footer } from "./components/sections/Footer";
-import { Gallery } from "./components/sections/Gallery";
 import { Header } from "./components/sections/Header";
 import { Hero } from "./components/sections/Hero";
 import { ServicesMarquee } from "./components/sections/ServicesMarquee";
@@ -22,7 +21,6 @@ function App() {
         <Spaces />
         <Features />
         <Team />
-        <Gallery />
         <Testimonials />
         <ContactForm />
       </div>
