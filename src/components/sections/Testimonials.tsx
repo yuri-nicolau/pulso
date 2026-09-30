@@ -28,7 +28,7 @@ const TESTIMONIALS: Testimonial[] = [
     avatar: depoimento02,
   },
   {
-    name: "Nome do aluno",
+    name: "Leonardo",
     quote:
       "Encontrei na Pulso um treino que cabe na minha rotina e uma equipe que realmente acompanha de perto. Saio de cada aula com mais disposição — e com vontade de voltar no dia seguinte.",
     avatar: depoimento03,
