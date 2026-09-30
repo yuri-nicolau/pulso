@@ -13,16 +13,15 @@ interface Testimonial {
 
 const STAR_IDS = ["star-1", "star-2", "star-3", "star-4", "star-5"];
 
-// TODO: substituir pelos nomes reais das alunas.
 const TESTIMONIALS: Testimonial[] = [
   {
-    name: "Aluna Pulso 1",
+    name: "Ana Carolina",
     quote:
       "Desde o primeiro dia fazendo parte da história da Pulso. 💚 Resultados, amizades e muitos momentos vividos juntos. 💪",
     avatar: depoimento01,
   },
   {
-    name: "Aluna Pulso 2",
+    name: "Lariana",
     quote:
       "Há quase dez anos, a Pulso me mostra que sempre existe um próximo nível. Com inovação, novos desafios e metodologias em constante evolução, descobri que, quando acho que cheguei à minha melhor versão, ainda posso ir além.",
     avatar: depoimento02,
