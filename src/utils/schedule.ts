@@ -40,14 +40,23 @@ export const CLASS_TYPE_INFO: Record<
   "funcional-teen": { label: "Funcional Teen", dotClassName: "bg-green-500" },
 };
 
-// Espelha a divisão de espaços do Studio (Sala Funcional x Sala de
-// Musculação — ver components/sections/Spaces.tsx): cada interesse declarado
-// no formulário libera apenas os tipos de treino daquele espaço.
+// Tipos de aula com horário marcado que cada interesse libera no formulário.
+// Musculação tem horário livre, então nunca entra aqui: quem escolhe só
+// "Academia" não precisa escolher horário, e "Os dois" vê apenas os horários
+// das aulas da Sala Funcional.
 export const INTEREST_CLASS_TYPES: Record<Interest, ClassType[]> = {
   funcional: ["funcional", "hiit", "pilates", "funcional-teen"],
-  academia: ["musculacao"],
-  "os-dois": ["funcional", "hiit", "pilates", "funcional-teen", "musculacao"],
+  academia: [],
+  "os-dois": ["funcional", "hiit", "pilates", "funcional-teen"],
 };
+
+// Valor enviado no lugar do horário quando o interesse é só musculação.
+export const FREE_TIME_LABEL = "Horário livre";
+
+/** Se o interesse exige escolher um horário de aula no formulário. */
+export function requiresPreferredTime(interest: Interest): boolean {
+  return INTEREST_CLASS_TYPES[interest].length > 0;
+}
 
 export const INTEREST_OPTIONS: { value: Interest; label: string }[] = [
   { value: "funcional", label: "Treino funcional" },

@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
   CheckCircle2,
@@ -12,10 +13,12 @@ import { useState, type FormEvent } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   CLASS_TYPE_INFO,
+  FREE_TIME_LABEL,
   FREQUENCY_OPTIONS,
   getGenericTimeOptions,
   getTrainingTypeForTime,
   INTEREST_OPTIONS,
+  requiresPreferredTime,
   type Interest,
 } from "../../utils/schedule";
 import { LeadSubmissionError, submitLead } from "../../utils/submitLead";
@@ -64,7 +67,7 @@ function isFormComplete(form: FormState): form is CompleteFormState {
       form.phone &&
       form.interest &&
       form.frequency &&
-      form.preferredTime,
+      (form.preferredTime || !requiresPreferredTime(form.interest)),
   );
 }
 
@@ -74,6 +77,9 @@ export function ContactForm() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const timeOptions = form.interest ? getGenericTimeOptions(form.interest) : [];
+  // Sem interesse escolhido ainda, o campo aparece com a mensagem de vazio;
+  // só some quando o interesse é musculação (horário livre).
+  const showTimeField = !form.interest || requiresPreferredTime(form.interest);
 
   function updateField<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -105,7 +111,12 @@ export function ContactForm() {
       return;
     }
 
-    const trainingType = getTrainingTypeForTime(form.interest, form.preferredTime);
+    // Musculação tem horário livre: nada para validar, enviamos o rótulo
+    // fixo para a planilha continuar com todas as colunas preenchidas.
+    const needsTime = requiresPreferredTime(form.interest);
+    const trainingType = needsTime
+      ? getTrainingTypeForTime(form.interest, form.preferredTime)
+      : "musculacao";
     if (!trainingType) {
       setStatus("error");
       setErrorMessage("Selecione um horário válido.");
@@ -118,7 +129,7 @@ export function ContactForm() {
       phone: form.phone,
       interest: form.interest,
       frequency: form.frequency,
-      preferredTime: form.preferredTime,
+      preferredTime: needsTime ? form.preferredTime : FREE_TIME_LABEL,
       trainingType,
     };
 
@@ -317,40 +328,74 @@ export function ContactForm() {
                   />
                 </fieldset>
 
-                <fieldset className="m-0 border-0 p-0">
-                  <legend className="mb-3 text-sm font-medium text-sand-100/80">
-                    Melhor horário
-                  </legend>
-                  <PillGroup
-                    name="Horário preferido"
-                    options={timeOptions.map((option) => ({
-                      value: option.time,
-                      // Todo botão traz o nome da atividade escrito — a cor
-                      // do indicador é só reforço visual, nunca a única
-                      // forma de saber o que é aquele horário (ex.: um
-                      // horário de Funcional Teen precisa ficar óbvio).
-                      label: `${option.time} · ${CLASS_TYPE_INFO[option.type].label}`,
-                      dotClassName: CLASS_TYPE_INFO[option.type].dotClassName,
-                    }))}
-                    value={form.preferredTime}
-                    onChange={(value) => updateField("preferredTime", value)}
-                    disabled={status === "loading"}
-                    emptyMessage="Escolha seu interesse acima para ver os horários disponíveis."
-                  />
+                <AnimatePresence initial={false} mode="wait">
+                  {showTimeField ? (
+                    <motion.div
+                      key="time-field"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                      // -m-1 p-1: folga para o ring de foco dos pills não
+                      // ser cortado pelo overflow-hidden da animação.
+                      className="-m-1 overflow-hidden p-1"
+                    >
+                      <fieldset className="m-0 border-0 p-0">
+                        <legend className="mb-3 text-sm font-medium text-sand-100/80">
+                          Melhor horário
+                        </legend>
+                        <PillGroup
+                          name="Horário preferido"
+                          options={timeOptions.map((option) => ({
+                            value: option.time,
+                            // Todo botão traz o nome da atividade escrito — a cor
+                            // do indicador é só reforço visual, nunca a única
+                            // forma de saber o que é aquele horário (ex.: um
+                            // horário de Funcional Teen precisa ficar óbvio).
+                            label: `${option.time} · ${CLASS_TYPE_INFO[option.type].label}`,
+                            dotClassName: CLASS_TYPE_INFO[option.type].dotClassName,
+                          }))}
+                          value={form.preferredTime}
+                          onChange={(value) => updateField("preferredTime", value)}
+                          disabled={status === "loading"}
+                          emptyMessage="Escolha seu interesse acima para ver os horários disponíveis."
+                        />
 
-                  <p className="mt-3 flex items-start gap-2 text-xs leading-relaxed text-sand-100/60">
-                    <Info
-                      className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-400"
-                      aria-hidden="true"
-                    />
-                    <span>
-                      Horários de segunda a quinta. Sexta-feira tem grade
-                      reduzida no fim do dia e sábado funciona só pela manhã —
-                      nossa equipe confirma o horário exato com você. Não
-                      funcionamos aos domingos.
-                    </span>
-                  </p>
-                </fieldset>
+                        <p className="mt-3 flex items-start gap-2 text-xs leading-relaxed text-sand-100/60">
+                          <Info
+                            className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-400"
+                            aria-hidden="true"
+                          />
+                          <span>
+                            Horários de segunda a quinta. Sexta-feira tem grade
+                            reduzida no fim do dia e sábado funciona só pela manhã —
+                            nossa equipe confirma o horário exato com você. Não
+                            funcionamos aos domingos.
+                          </span>
+                        </p>
+                      </fieldset>
+                    </motion.div>
+                  ) : (
+                    <motion.p
+                      key="free-time-note"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                      className="flex items-start gap-2 overflow-hidden text-xs leading-relaxed text-sand-100/60"
+                    >
+                      <Info
+                        className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-400"
+                        aria-hidden="true"
+                      />
+                      <span>
+                        A musculação tem horário livre, então não é preciso
+                        escolher um horário. Nossa equipe alinha os detalhes
+                        com você.
+                      </span>
+                    </motion.p>
+                  )}
+                </AnimatePresence>
 
                 {status === "error" && (
                   <p role="alert" className="text-sm text-orange-300">

@@ -1,6 +1,7 @@
 import { Star } from "lucide-react";
 import depoimento01 from "../../assets/photos/depoimento-01.jpg";
 import depoimento02 from "../../assets/photos/depoimento-02.jpg";
+import depoimento03 from "../../assets/photos/depoimento-03.jpg";
 import { getButtonClasses } from "../ui/Button";
 import { PulseOrb } from "../ui/PulseOrb";
 import { Reveal, StaggerGroup, StaggerItem } from "../ui/Reveal";
@@ -26,6 +27,12 @@ const TESTIMONIALS: Testimonial[] = [
       "Há quase dez anos, a Pulso me mostra que sempre existe um próximo nível. Com inovação, novos desafios e metodologias em constante evolução, descobri que, quando acho que cheguei à minha melhor versão, ainda posso ir além.",
     avatar: depoimento02,
   },
+  {
+    name: "Nome do aluno",
+    quote:
+      "Encontrei na Pulso um treino que cabe na minha rotina e uma equipe que realmente acompanha de perto. Saio de cada aula com mais disposição — e com vontade de voltar no dia seguinte.",
+    avatar: depoimento03,
+  },
 ];
 
 export function Testimonials() {
@@ -48,7 +55,7 @@ export function Testimonials() {
         </p>
       </Reveal>
 
-      <StaggerGroup className="relative mx-auto mt-16 grid max-w-4xl grid-cols-1 gap-6 sm:grid-cols-2">
+      <StaggerGroup className="relative mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
         {TESTIMONIALS.map(({ name, quote, avatar }) => (
           <StaggerItem
             key={name}

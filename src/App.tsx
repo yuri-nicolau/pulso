@@ -1,6 +1,7 @@
 import { About } from "./components/sections/About";
 import { ContactForm } from "./components/sections/ContactForm";
 import { Features } from "./components/sections/Features";
+import { Gallery } from "./components/sections/Gallery";
 import { Footer } from "./components/sections/Footer";
 import { Header } from "./components/sections/Header";
 import { Hero } from "./components/sections/Hero";
@@ -21,6 +22,7 @@ function App() {
         <Spaces />
         <Features />
         <Team />
+        <Gallery />
         <Testimonials />
         <ContactForm />
       </div>
