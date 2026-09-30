@@ -1,7 +1,7 @@
-import professor01 from "../../assets/photos/professor-01.jpg";
-import professor02 from "../../assets/photos/professor-02.jpg";
-import professor03 from "../../assets/photos/professor-03.jpg";
-import professor04 from "../../assets/photos/professor-04.jpg";
+import jacksonDestro from "../../assets/photos/jackson-destro.jpg";
+import joaoFranciscoGatti from "../../assets/photos/joao-francisco-gatti.jpg";
+import joyceApolinario from "../../assets/photos/joyce-apolinario.jpg";
+import mariahFarinaElias from "../../assets/photos/mariah-farina-elias.jpg";
 import { PulseOrb } from "../ui/PulseOrb";
 import { Reveal, StaggerGroup, StaggerItem } from "../ui/Reveal";
 
@@ -11,12 +11,11 @@ interface TeamMember {
   photo: string;
 }
 
-// TODO: substituir pelos nomes reais dos professores.
 const TEAM: TeamMember[] = [
-  { name: "Professor 1", role: "Personal Trainer", photo: professor01 },
-  { name: "Professor 2", role: "Personal Trainer", photo: professor02 },
-  { name: "Professora 3", role: "Personal Trainer", photo: professor03 },
-  { name: "Professora 4", role: "Personal Trainer", photo: professor04 },
+  { name: "Jackson Destro", role: "Personal Trainer", photo: jacksonDestro },
+  { name: "Mariáh Farina Elias", role: "Personal Trainer", photo: mariahFarinaElias },
+  { name: "Joyce Apolinário", role: "Personal Trainer", photo: joyceApolinario },
+  { name: "João Francisco Gatti", role: "Personal Trainer", photo: joaoFranciscoGatti },
 ];
 
 export function Team() {
