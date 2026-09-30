@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import aboutPhoto from "../../assets/photos/espaco-01.jpg";
 import { PulseOrb } from "../ui/PulseOrb";
 import { Reveal, StaggerGroup, StaggerItem } from "../ui/Reveal";
 
@@ -29,8 +30,8 @@ export function About() {
         <Reveal className="w-full md:w-1/2" y={40}>
           <div className="group relative aspect-[4/5] overflow-hidden rounded-[2rem] shadow-premium">
             <img
-              src="https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=1000&q=80"
-              alt="Professor orientando aluno durante o treino na Pulso Concept"
+              src={aboutPhoto}
+              alt="Ambiente amplo e iluminado do Studio Pulso Concept"
               className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
               loading="lazy"
             />

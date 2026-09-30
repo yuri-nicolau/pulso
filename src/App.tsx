@@ -7,6 +7,7 @@ import { Header } from "./components/sections/Header";
 import { Hero } from "./components/sections/Hero";
 import { ServicesMarquee } from "./components/sections/ServicesMarquee";
 import { Spaces } from "./components/sections/Spaces";
+import { Team } from "./components/sections/Team";
 import { Testimonials } from "./components/sections/Testimonials";
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <About />
         <Spaces />
         <Features />
+        <Team />
         <Gallery />
         <Testimonials />
         <ContactForm />

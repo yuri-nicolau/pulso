@@ -1,4 +1,6 @@
 import { Star } from "lucide-react";
+import depoimento01 from "../../assets/photos/depoimento-01.jpg";
+import depoimento02 from "../../assets/photos/depoimento-02.jpg";
 import { getButtonClasses } from "../ui/Button";
 import { PulseOrb } from "../ui/PulseOrb";
 import { Reveal, StaggerGroup, StaggerItem } from "../ui/Reveal";
@@ -11,26 +13,19 @@ interface Testimonial {
 
 const STAR_IDS = ["star-1", "star-2", "star-3", "star-4", "star-5"];
 
+// TODO: substituir pelos nomes reais das alunas.
 const TESTIMONIALS: Testimonial[] = [
   {
-    name: "Marina R.",
-    quote: "Hoje a Pulso faz parte da minha rotina.",
-    avatar:
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80",
+    name: "Aluna Pulso 1",
+    quote:
+      "Desde o primeiro dia fazendo parte da história da Pulso. 💚 Resultados, amizades e muitos momentos vividos juntos. 💪",
+    avatar: depoimento01,
   },
   {
-    name: "Carlos T.",
+    name: "Aluna Pulso 2",
     quote:
-      "Finalmente encontrei um lugar onde realmente acompanham minha evolução.",
-    avatar:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80",
-  },
-  {
-    name: "Beatriz A.",
-    quote:
-      "O acompanhamento próximo dos professores fez toda a diferença nos meus resultados.",
-    avatar:
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80",
+      "Há quase dez anos, a Pulso me mostra que sempre existe um próximo nível. Com inovação, novos desafios e metodologias em constante evolução, descobri que, quando acho que cheguei à minha melhor versão, ainda posso ir além.",
+    avatar: depoimento02,
   },
 ];
 
@@ -54,7 +49,7 @@ export function Testimonials() {
         </p>
       </Reveal>
 
-      <StaggerGroup className="relative mt-16 grid grid-cols-1 gap-6 sm:grid-cols-3">
+      <StaggerGroup className="relative mx-auto mt-16 grid max-w-4xl grid-cols-1 gap-6 sm:grid-cols-2">
         {TESTIMONIALS.map(({ name, quote, avatar }) => (
           <StaggerItem
             key={name}
@@ -64,7 +59,7 @@ export function Testimonials() {
             <img
               src={avatar}
               alt={name}
-              className="h-14 w-14 rounded-full object-cover ring-4 ring-white"
+              className="h-16 w-16 rounded-full object-cover ring-4 ring-white"
               loading="lazy"
             />
             <div className="mt-4 flex gap-1 text-orange-500">
@@ -72,7 +67,7 @@ export function Testimonials() {
                 <Star key={id} size={14} fill="currentColor" strokeWidth={0} />
               ))}
             </div>
-            <blockquote className="mt-4 text-sm text-ink-soft">
+            <blockquote className="mt-4 text-sm leading-relaxed text-ink-soft">
               “{quote}”
             </blockquote>
             <figcaption className="mt-4 text-xs font-medium uppercase tracking-[0.15em] text-ink-muted">

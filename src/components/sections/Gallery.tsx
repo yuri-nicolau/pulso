@@ -1,44 +1,23 @@
+import espaco01 from "../../assets/photos/espaco-01.jpg";
+import espaco02 from "../../assets/photos/espaco-02.jpg";
+import espaco03 from "../../assets/photos/espaco-03.jpg";
+import espaco04 from "../../assets/photos/espaco-04.jpg";
 import { Reveal, StaggerGroup, StaggerItem } from "../ui/Reveal";
 
 interface GalleryPhoto {
   image: string;
   label: string;
-  className?: string;
+  className: string;
 }
 
+// Mosaico: fotos horizontais ocupam 2 colunas, verticais ocupam 2 linhas.
+// Em 4 colunas forma o bloco [H H V V] / [H H V V]; em 2 colunas empilha
+// H / V V / H — sem buracos em nenhum breakpoint.
 const PHOTOS: GalleryPhoto[] = [
-  {
-    image:
-      "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&w=900&q=80",
-    label: "Recepção",
-    className: "sm:col-span-2 sm:row-span-2",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=700&q=80",
-    label: "Sala funcional",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=700&q=80",
-    label: "Sala de musculação",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=700&q=80",
-    label: "Tecnologia MOOVZ",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=700&q=80",
-    label: "Professores",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=900&q=80",
-    label: "Alunos em treino",
-    className: "sm:col-span-2",
-  },
+  { image: espaco01, label: "Nosso espaço", className: "col-span-2" },
+  { image: espaco03, label: "Sala de musculação", className: "row-span-2" },
+  { image: espaco04, label: "Estrutura completa", className: "row-span-2" },
+  { image: espaco02, label: "Sala funcional", className: "col-span-2" },
 ];
 
 export function Gallery() {
@@ -55,12 +34,12 @@ export function Gallery() {
 
       <StaggerGroup
         stagger={0.06}
-        className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-6"
+        className="mt-16 grid auto-rows-[10rem] grid-cols-2 gap-4 sm:auto-rows-[14rem] sm:grid-cols-4 sm:gap-6 lg:auto-rows-[16rem]"
       >
-        {PHOTOS.map(({ image, label, className = "" }) => (
+        {PHOTOS.map(({ image, label, className }) => (
           <StaggerItem
             key={label}
-            className={`group relative aspect-square overflow-hidden rounded-2xl ${className}`}
+            className={`group relative overflow-hidden rounded-2xl ${className}`}
           >
             <img
               src={image}

@@ -10,6 +10,8 @@ import {
   HeartPulse,
   HeartHandshake,
 } from "lucide-react";
+import functionalPhoto from "../../assets/photos/espaco-02.jpg";
+import strengthPhoto from "../../assets/photos/espaco-03.jpg";
 import { Reveal, StaggerGroup, StaggerItem } from "../ui/Reveal";
 
 interface SpaceFeature {
@@ -119,7 +121,7 @@ export function Spaces() {
         <SpaceCard
           title="Sala de Treinamento Funcional"
           description="Espaço desenvolvido para aulas em grupos reduzidos, com equipamentos variados e metodologia voltada para um treinamento dinâmico, eficiente e acompanhado de perto pelos professores."
-          image="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=80"
+          image={functionalPhoto}
           features={functionalFeatures}
           align="left"
         />
@@ -127,7 +129,7 @@ export function Spaces() {
         <SpaceCard
           title="Sala de Musculação (Treino de Força)"
           description="Ambiente equipado com aparelhos e pesos livres para treinos de força, hipertrofia, condicionamento físico e melhoria da qualidade de vida, sempre com orientação profissional."
-          image="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200&q=80"
+          image={strengthPhoto}
           features={strengthFeatures}
           align="right"
         />
