@@ -5,7 +5,7 @@
  * 1. Crie/abra a planilha do Google Sheets que vai receber os leads.
  * 2. Extensões > Apps Script.
  * 3. Apague o conteúdo padrão do Code.gs e cole este arquivo inteiro.
- * 4. Ajuste NOTIFICATION_EMAIL abaixo para o e-mail que deve receber o aviso.
+ * 4. Confira NOTIFICATION_EMAIL abaixo — é o e-mail que recebe o aviso de cada lead.
  * 5. Implantar > Nova implantação > tipo "App da Web".
  *      - Executar como: Eu (sua conta)
  *      - Quem pode acessar: Qualquer pessoa
@@ -18,7 +18,7 @@
  */
 
 const SHEET_NAME = "Leads";
-const NOTIFICATION_EMAIL = "SEU_EMAIL_AQUI@gmail.com";
+const NOTIFICATION_EMAIL = "pulsoconceptstudio@gmail.com";
 
 const HEADERS = [
   "Data",
@@ -87,25 +87,22 @@ function doPost(e) {
       trainingTypeLabel,
     ]);
 
-    if (
-      NOTIFICATION_EMAIL &&
-      NOTIFICATION_EMAIL.indexOf("SEU_EMAIL_AQUI") === -1
-    ) {
-      MailApp.sendEmail({
-        to: NOTIFICATION_EMAIL,
-        subject: "Novo contato pelo site — Pulso Concept",
-        body:
-          "Novo pedido de contato recebido pelo site. A pessoa NÃO agendou " +
-          "nada — o formulário só coleta o interesse dela para a nossa " +
-          "equipe entrar em contato:\n\n" +
-          "Nome: " + name + "\n" +
-          "E-mail: " + email + "\n" +
-          "WhatsApp: " + phone + "\n" +
-          "Interesse: " + interestLabel + "\n" +
-          "Frequência desejada: " + frequency + "\n" +
-          "Horário preferido: " + preferredTime + " (" + trainingTypeLabel + ")",
-      });
-    }
+    MailApp.sendEmail({
+      to: NOTIFICATION_EMAIL,
+      // "Responder" no aviso já abre a resposta direto para o e-mail do lead.
+      replyTo: email,
+      subject: "Novo contato pelo site — Pulso Concept",
+      body:
+        "Novo pedido de contato recebido pelo site. A pessoa NÃO agendou " +
+        "nada — o formulário só coleta o interesse dela para a nossa " +
+        "equipe entrar em contato:\n\n" +
+        "Nome: " + name + "\n" +
+        "E-mail: " + email + "\n" +
+        "WhatsApp: " + phone + "\n" +
+        "Interesse: " + interestLabel + "\n" +
+        "Frequência desejada: " + frequency + "\n" +
+        "Horário preferido: " + preferredTime + " (" + trainingTypeLabel + ")",
+    });
 
     return jsonResponse({ status: "success" });
   } catch (err) {

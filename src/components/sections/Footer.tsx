@@ -1,4 +1,6 @@
 import logoExtenso from "../../assets/optimized/logo-extenso01.png";
+import { INSTAGRAM_HANDLE, INSTAGRAM_URL } from "../../utils/instagram";
+import { InstagramIcon } from "../ui/InstagramIcon";
 
 const NAV_LINKS = [
   { href: "#sobre", label: "Sobre" },
@@ -27,17 +29,29 @@ export function Footer() {
           />
         </a>
 
-        <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 sm:justify-end">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium text-ink-muted transition-colors hover:text-orange-600"
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
+        <div className="flex flex-col items-center gap-6 sm:flex-row sm:gap-8">
+          <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 sm:justify-end">
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="text-sm font-medium text-ink-muted transition-colors hover:text-orange-600"
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+
+          <a
+            href={INSTAGRAM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Instagram da Pulso Concept (@${INSTAGRAM_HANDLE})`}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ink/15 text-ink transition-all duration-300 hover:-rotate-12 hover:border-orange-500 hover:bg-orange-500 hover:text-white"
+          >
+            <InstagramIcon size={18} />
+          </a>
+        </div>
       </div>
 
       <div className="border-t border-ink/10 px-6 py-6 text-center text-xs text-ink-muted">

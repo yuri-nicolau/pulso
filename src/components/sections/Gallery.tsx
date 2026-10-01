@@ -4,6 +4,7 @@ import galeria03 from "../../assets/photos/galeria-03.jpg";
 import galeria04 from "../../assets/photos/galeria-04.jpg";
 import galeria05 from "../../assets/photos/galeria-05.jpg";
 import galeria06 from "../../assets/photos/galeria-06.jpg";
+import { InstagramButton } from "../ui/InstagramButton";
 import { PulseOrb } from "../ui/PulseOrb";
 import { Reveal, StaggerGroup, StaggerItem } from "../ui/Reveal";
 
@@ -89,6 +90,13 @@ export function Gallery() {
           </StaggerItem>
         ))}
       </StaggerGroup>
+
+      <Reveal className="relative mt-14 flex flex-col items-center gap-5 text-center">
+        <p className="text-sm text-ink-muted">
+          Tem muito mais do nosso dia a dia por lá.
+        </p>
+        <InstagramButton />
+      </Reveal>
     </section>
   );
 }
