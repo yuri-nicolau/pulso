@@ -4,6 +4,7 @@ Status: `[x]` done · `[ ]` to do · ❓ open question (ask before building on i
 
 ## Landing page (`/`)
 - [x] Sections: Hero, Services marquee, About, Spaces, Features, Team, Gallery, Testimonials, Contact, Footer.
+- [x] Mobile menu: backdrop, closes on Escape/outside tap/link, scroll lock, focus in and back, `aria-expanded`, 44px toggle.
 - [x] Contact form ("Sua evolução começa aqui."): name, WhatsApp, email, interest, frequency, preferred class time. Responses go to the admin page (form `contact`). Google Sheets/Apps Script was removed (2026-10-15). It never says the trial class is free.
 
 ## Trial class form (`/aula-experimental`)
@@ -19,6 +20,7 @@ Standalone page, shared as a direct link (e.g. Instagram bio). Brand backdrop: b
 - [x] Every form's responses in one list (newest first): search (name, email, phone), filters (form, status, payment), counters (total, new, trial scheduled, enrolled, enrolled with payment pending).
 - [x] Follow-up per response: status (Novo → Em contato → Aula agendada → Matriculado / Não fechou), payment (Pendente / Pago), notes; WhatsApp / call / email shortcuts; delete for good (confirm).
 - [x] Export the filtered list as CSV (Excel-friendly).
+- [x] Filters are custom dropdowns (`Select`): visible label, value + clear button when active, status/payment dots, faceted counts, "Limpar filtros"; popover on desktop, bottom sheet on phones, full keyboard support.
 - [ ] ❓ Email (or other) notification when a new response arrives: the old Apps Script emailed `pulsoconceptstudio@gmail.com`; nothing notifies today. Needs a free email provider (e.g. Resend's free tier).
 
 ## Platform

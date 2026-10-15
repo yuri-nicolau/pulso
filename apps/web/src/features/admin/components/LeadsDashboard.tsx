@@ -10,8 +10,9 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import logoExtenso from "../../../assets/optimized/logo-extenso01.png";
-import { Badge } from "../../../components/ui/Badge";
+import { BADGE_DOTS, Badge } from "../../../components/ui/Badge";
 import { EmptyState } from "../../../components/ui/EmptyState";
+import { Select } from "../../../components/ui/Select";
 import { Skeleton } from "../../../components/ui/Skeleton";
 import { useToast } from "../../../components/ui/Toast";
 import { formatPhoneDisplay } from "../../../utils/phone";
@@ -116,6 +117,11 @@ export function LeadsDashboard({
 
   function updateFilter<K extends keyof Filters>(key: K, value: Filters[K]) {
     setFilters((current) => ({ ...current, [key]: value }));
+  }
+
+  // Faceted count: how many responses this option would show, with the other filters kept.
+  function countWith<K extends "form" | "status" | "payment">(key: K, value: Filters[K]) {
+    return allLeads.filter((lead) => matches(lead, { ...filters, [key]: value })).length;
   }
 
   async function copyFormLink() {
@@ -237,40 +243,64 @@ export function LeadsDashboard({
               className="w-full rounded-full bg-sand-100 py-2.5 pl-11 pr-4 text-sm text-ink outline-none transition-all placeholder:text-ink-muted focus:bg-white focus:ring-2 focus:ring-orange-500"
             />
           </div>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 lg:flex">
-            <FilterSelect
+          <div className="flex flex-wrap items-center gap-2">
+            <Select
               label="Formulário"
               value={filters.form}
-              onChange={(value) => updateFilter("form", value as Filters["form"])}
+              resetValue="all"
+              onChange={(value) => updateFilter("form", value)}
               options={[
-                { value: "all", label: "Todos os formulários" },
-                ...FORM_ORDER.map((form) => ({ value: form, label: FORM_LABELS[form] })),
+                { value: "all", label: "Todos os formulários", count: countWith("form", "all") },
+                ...FORM_ORDER.map((form) => ({
+                  value: form,
+                  label: FORM_LABELS[form],
+                  count: countWith("form", form),
+                })),
               ]}
             />
-            <FilterSelect
+            <Select
               label="Status"
               value={filters.status}
-              onChange={(value) => updateFilter("status", value as Filters["status"])}
+              resetValue="all"
+              onChange={(value) => updateFilter("status", value)}
               options={[
-                { value: "all", label: "Todos os status" },
+                { value: "all", label: "Todos os status", count: countWith("status", "all") },
                 ...STATUS_ORDER.map((status) => ({
                   value: status,
                   label: STATUS_LABELS[status].label,
+                  dotClassName: BADGE_DOTS[STATUS_LABELS[status].tone],
+                  count: countWith("status", status),
                 })),
               ]}
             />
-            <FilterSelect
+            <Select
               label="Pagamento"
               value={filters.payment}
-              onChange={(value) => updateFilter("payment", value as Filters["payment"])}
+              resetValue="all"
+              onChange={(value) => updateFilter("payment", value)}
               options={[
-                { value: "all", label: "Todos os pagamentos" },
+                {
+                  value: "all",
+                  label: "Todos os pagamentos",
+                  count: countWith("payment", "all"),
+                },
                 ...PAYMENT_ORDER.map((payment) => ({
                   value: payment,
                   label: PAYMENT_LABELS[payment].label,
+                  dotClassName: BADGE_DOTS[PAYMENT_LABELS[payment].tone],
+                  count: countWith("payment", payment),
                 })),
               ]}
             />
+            {hasFilters && (
+              <button
+                type="button"
+                onClick={() => setFilters(NO_FILTERS)}
+                className="min-h-10 rounded-full px-3 text-sm font-medium text-ink-muted underline-offset-4 transition-colors hover:text-ink hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+              >
+                Limpar filtros
+              </button>
+            )}
           </div>
         </div>
 
@@ -338,32 +368,6 @@ export function LeadsDashboard({
 
       <LeadDetailSheet lead={selected} onClose={() => setSelectedId(null)} />
     </div>
-  );
-}
-
-interface FilterSelectProps {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: { value: string; label: string }[];
-}
-
-function FilterSelect({ label, value, onChange, options }: FilterSelectProps) {
-  return (
-    <select
-      aria-label={label}
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      className={`cursor-pointer rounded-full border-0 py-2.5 pl-4 pr-9 text-sm font-medium outline-none transition-colors focus:ring-2 focus:ring-orange-500 ${
-        value === "all" ? "bg-sand-100 text-ink" : "bg-ink text-white"
-      }`}
-    >
-      {options.map((option) => (
-        <option key={option.value} value={option.value} className="bg-white text-ink">
-          {option.label}
-        </option>
-      ))}
-    </select>
   );
 }
 

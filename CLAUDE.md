@@ -55,6 +55,7 @@ Follow the ubiquitous language: domain names match across DB, API and frontend.
 - **pt-BR for ALL user-facing text**: labels, buttons, placeholders, messages, empty states, `aria-label`/`sr-only`/`title`, confirm dialogs, toasts, `<title>`. Enum values are shown through explicit pt-BR label maps (`features/admin/labels.ts`, `utils/weekdays.ts`, `utils/schedule.ts`). Dates/numbers use `pt-BR` and `America/Sao_Paulo`. Code and API error messages stay English.
 - Feedback: skeletons for loading content, a spinner inside the button for actions, toasts (`useToast`) for results; never a bare "Carregando…" or a silent wait. Empty lists use `EmptyState`; destructive actions use `ConfirmDialog`, never `window.confirm`.
 - Overlays: an existing item opens in a right `Sheet` (full screen on phones).
+- **Dropdowns:** `components/ui/Select` (listbox), never a native `<select>`. The trigger always shows the field's label (and the value once one is picked, with a clear button); options show the same colored dot as the matching badge and, for filters, a faceted count; a popover from `sm` up, a bottom sheet on phones; full keyboard support (arrows, Home/End, type-to-jump, Enter, Escape). Menus that drop down (e.g. the landing's mobile menu) close on Escape and outside tap, lock the page scroll, move focus in and back, and expose `aria-expanded`/`aria-controls`.
 - Responsiveness: EVERY frontend change checked at ~375px, ~768px and ~1280px (`sm`/`md`/`lg`/`xl`), with no horizontal scroll, and with iOS safe areas respected on full-screen pages.
 
 ## D. Design system

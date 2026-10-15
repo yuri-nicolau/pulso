@@ -13,7 +13,8 @@ const TONES: Record<BadgeTone, string> = {
   ink: "bg-ink text-white",
 };
 
-const DOTS: Record<BadgeTone, string> = {
+/** The dot color of each tone, for anything that must match a badge (e.g. dropdown options). */
+export const BADGE_DOTS: Record<BadgeTone, string> = {
   orange: "bg-orange-500",
   sky: "bg-sky-500",
   violet: "bg-violet-500",
@@ -34,7 +35,7 @@ export function Badge({ tone, children, className = "" }: BadgeProps) {
     <span
       className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium ${TONES[tone]} ${className}`}
     >
-      <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${DOTS[tone]}`} />
+      <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${BADGE_DOTS[tone]}`} />
       {children}
     </span>
   );
