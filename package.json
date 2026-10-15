@@ -1,31 +1,30 @@
 {
-  "name": "pulso",
-  "module": "index.ts",
-  "type": "module",
+  "name": "pulso-concept",
   "private": true,
+  "type": "module",
+  "packageManager": "bun@1.4.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
+    "dev": "bun run --filter '@pulso-concept/api' --filter '@pulso-concept/web' dev",
+    "dev:api": "bun run --cwd apps/api dev",
+    "dev:web": "bun run --cwd apps/web dev",
+    "build:web": "bun run --cwd apps/web build",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit -p . && bun run --filter '*' typecheck",
+    "test": "bun test",
+    "db:up": "docker compose up -d --wait postgres",
+    "db:generate": "bun run --cwd packages/db generate",
+    "db:migrate": "bun run --cwd packages/db migrate:local",
     "push": "git add . && git commit -m \"update: alterações no projeto\" && git push origin main"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
     "@types/bun": "latest",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.4",
-    "autoprefixer": "^10.5.4",
-    "postcss": "^8.5.23",
-    "tailwindcss": "^3",
-    "vite": "^8.1.5"
-  },
-  "peerDependencies": {
+    "railway": "^3.16.0",
     "typescript": "^7.0.2"
-  },
-  "dependencies": {
-    "framer-motion": "^12.42.2",
-    "lucide-react": "^1.27.0",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8"
   }
 }

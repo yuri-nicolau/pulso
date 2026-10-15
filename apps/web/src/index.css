@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+@layer utilities {
+  /* Film grain over the colored backgrounds (SVG noise, no external image). */
+  .bg-grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Halftone dot grid that fades out toward the edges. */
+  .bg-halftone {
+    background-image: radial-gradient(rgb(255 255 255 / 0.22) 1px, transparent 1.4px);
+    background-size: 18px 18px;
+    mask-image: radial-gradient(ellipse at center, black 10%, transparent 70%);
+  }
+
+  /* Brand color mesh: magenta, wine and orange over black. */
+  .bg-brand-mesh {
+    background-image:
+      radial-gradient(60% 55% at 12% 18%, rgb(226 24 122 / 0.85), transparent 70%),
+      radial-gradient(55% 50% at 88% 82%, rgb(249 88 26 / 0.85), transparent 70%),
+      radial-gradient(45% 40% at 70% 20%, rgb(147 12 79 / 0.7), transparent 75%),
+      radial-gradient(50% 45% at 25% 85%, rgb(234 61 15 / 0.45), transparent 75%);
+  }
+
+  /* Outlined (stroke-only) text for the giant background lettering. */
+  .text-outline {
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgb(255 255 255 / 0.14);
+  }
+}
