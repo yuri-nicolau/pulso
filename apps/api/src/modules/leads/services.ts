@@ -8,11 +8,14 @@ import {
 import {
   type ContactAnswers,
   type FormKey,
-  isTrialClassHourAvailable,
+  isValidEmail,
   isValidPhone,
   type LeadAnswers,
+  normalizeEmail,
   normalizePhone,
+  sortWeekdays,
   type TrialClassAnswers,
+  trialClassHoursForDays,
 } from "@pulso-concept/forms";
 import { desc, eq } from "drizzle-orm";
 import type { AttemptLimiter } from "../../lib/attempts";
@@ -97,7 +100,8 @@ function cleanContactFields({ name, email, phone }: ContactFields): ContactField
   const cleanName = name.trim().replaceAll(/\s+/g, " ");
   if (cleanName.length < 2) throw new InvalidLeadError("Name is too short");
   if (!isValidPhone(phone)) throw new InvalidLeadError("Invalid phone number");
-  return { name: cleanName, email: email.trim().toLowerCase(), phone: normalizePhone(phone) };
+  if (!isValidEmail(email)) throw new InvalidLeadError("Invalid email");
+  return { name: cleanName, email: normalizeEmail(email), phone: normalizePhone(phone) };
 }
 
 export function guardSubmissionRate(limiter: AttemptLimiter, address: string): void {
@@ -140,10 +144,17 @@ export async function createContactLead(db: Database, input: ContactLeadInput) {
 
 export async function createTrialClassLead(db: Database, input: TrialClassLeadInput) {
   const fields = cleanContactFields(input);
-  if (!isTrialClassHourAvailable(input.weekday, input.hour)) {
-    throw new InvalidLeadError("The studio is closed in that period");
+  const weekdays = sortWeekdays(input.weekdays);
+  // Each period must be open on at least one of the chosen days (Saturday is morning only).
+  const offered = trialClassHoursForDays(weekdays);
+  const hours = [...new Set(input.hours)].sort();
+  if (weekdays.length === 0 || hours.length === 0) {
+    throw new InvalidLeadError("Pick at least one day and one period");
   }
-  const answers: TrialClassAnswers = { weekday: input.weekday, hour: input.hour };
+  if (hours.some((hour) => !offered.includes(hour))) {
+    throw new InvalidLeadError("The studio is closed in that period on the chosen days");
+  }
+  const answers: TrialClassAnswers = { weekdays, hours };
   return insertLead(db, "trial_class", fields, answers);
 }
 

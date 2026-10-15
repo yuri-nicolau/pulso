@@ -176,7 +176,7 @@ export function ContactForm() {
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-sand-100/80">
               Preencha seus dados e nossa equipe entrará em contato para agendar sua aula
-              experimental gratuita.
+              experimental.
             </p>
 
             {status === "success" ? (

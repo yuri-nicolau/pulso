@@ -19,8 +19,8 @@ export const contactLeadBody = t.Object({
 
 export const trialClassLeadBody = t.Object({
   ...contactFields,
-  weekday: oneOf(WEEKDAYS),
-  hour: t.String({ pattern: "^([01]\\d|2[0-3]):00$" }),
+  weekdays: t.Array(oneOf(WEEKDAYS), { minItems: 1, maxItems: WEEKDAYS.length }),
+  hours: t.Array(t.String({ pattern: "^([01]\\d|2[0-3]):00$" }), { minItems: 1, maxItems: 24 }),
 });
 
 export const leadParams = t.Object({ id: t.String({ format: "uuid" }) });

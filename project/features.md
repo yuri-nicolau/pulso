@@ -4,13 +4,15 @@ Status: `[x]` done · `[ ]` to do · ❓ open question (ask before building on i
 
 ## Landing page (`/`)
 - [x] Sections: Hero, Services marquee, About, Spaces, Features, Team, Gallery, Testimonials, Contact, Footer.
-- [x] Contact form ("Sua evolução começa aqui."): name, WhatsApp, email, interest, frequency, preferred class time. Responses go to the admin page (form `contact`). Google Sheets/Apps Script was removed (2026-10-15).
+- [x] Contact form ("Sua evolução começa aqui."): name, WhatsApp, email, interest, frequency, preferred class time. Responses go to the admin page (form `contact`). Google Sheets/Apps Script was removed (2026-10-15). It never says the trial class is free.
 
 ## Trial class form (`/aula-experimental`)
 Standalone page, shared as a direct link (e.g. Instagram bio). Brand backdrop: black with magenta/orange mesh, grain, halftone, the giant Pulso circle with pulsing rings and an outlined marquee.
-- [x] Fields: full name, phone (WhatsApp, masked), email, weekday (Monday to Saturday), one-hour period for weight training.
-- [x] Periods per day (`packages/forms`, derived from the class grid's first and last class): Mon–Thu 06:00–20:00, Fri 06:00–18:00, Sat 08:00–10:00. ❓ Confirm the weight room's real opening hours with the studio.
-- [x] Success state with a WhatsApp shortcut (message prefilled with the chosen day/period).
+- [x] Fields: full name, phone (WhatsApp), email, one or more weekdays (Monday to Saturday), one or more one-hour periods for weight training.
+- [x] Phone and email are masked while typing and checked on blur, in the browser and again in the API: phone = a real Brazilian mobile (DDD + 9 + 8 digits) or landline (DDD + 2–5 + 7 digits); email = lowercase, no accents/spaces, a real domain and extension.
+- [x] Periods offered (`packages/forms`): the studio is open 05:00–21:00, Monday to Saturday (closed on Sundays), so 16 one-hour periods from 05:00–06:00 to 20:00–21:00, shown before any day is picked. Hours are defined per day, so a day can differ later.
+- [x] Copy rules: never say the trial class is free; the form sends **preferences**, not a booking: the Pulso Concept team contacts the person to schedule it (stated under the button and on the success state).
+- [x] Submit button confirms in place (brand gradient, check drawn, pulse rings), then the success state with the chosen days/periods and a WhatsApp shortcut.
 
 ## Admin page (`/admin`)
 - [x] Access with the admin password (`ADMIN_PASSWORD` on Railway). Session: signed token, 7 days, on the device. 5 wrong passwords per address → locked for 15 minutes.

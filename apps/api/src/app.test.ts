@@ -5,8 +5,8 @@ const trialClass = {
   name: "João Souza",
   email: "joao@example.com",
   phone: "11 98765-4321",
-  weekday: "quinta",
-  hour: "19:00",
+  weekdays: ["quinta"],
+  hours: ["19:00"],
 };
 
 const contact = {
@@ -86,11 +86,11 @@ describe("public forms", () => {
 
   test("invalid answers are refused", async () => {
     const badDay = await request(ctx.app, "POST", "/api/leads/trial-class", {
-      body: { ...trialClass, weekday: "domingo" },
+      body: { ...trialClass, weekdays: ["domingo"] },
     });
     expect(badDay.status).toBe(422);
     const closed = await request(ctx.app, "POST", "/api/leads/trial-class", {
-      body: { ...trialClass, weekday: "sabado", hour: "19:00" },
+      body: { ...trialClass, weekdays: ["sabado"], hours: ["04:00"] },
     });
     expect(closed.status).toBe(422);
     expect((await readJson(closed)).code).toBe("INVALID_LEAD");
@@ -98,6 +98,14 @@ describe("public forms", () => {
       body: { ...contact, email: "not-an-email" },
     });
     expect(badEmail.status).toBe(422);
+    const noDays = await request(ctx.app, "POST", "/api/leads/trial-class", {
+      body: { ...trialClass, weekdays: [] },
+    });
+    expect(noDays.status).toBe(422);
+    const badPhone = await request(ctx.app, "POST", "/api/leads/trial-class", {
+      body: { ...trialClass, phone: "(11) 81234-5678" },
+    });
+    expect(badPhone.status).toBe(422);
   });
 
   test("submissions are rate limited per address", async () => {

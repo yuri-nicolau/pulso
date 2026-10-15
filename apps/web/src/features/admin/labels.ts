@@ -1,8 +1,8 @@
 import type { ContactAnswers, TrialClassAnswers } from "@pulso-concept/forms";
-import { periodEnd } from "@pulso-concept/forms";
 import type { BadgeTone } from "../../components/ui/Badge";
+import { formatPeriodList, formatShortPeriodList } from "../../utils/periods";
 import { CLASS_TYPE_INFO, FREE_TIME_LABEL, INTEREST_OPTIONS } from "../../utils/schedule";
-import { WEEKDAY_LABELS } from "../../utils/weekdays";
+import { formatWeekdayList } from "../../utils/weekdays";
 import type { FormKey, LeadStatus, LeadView, PaymentStatus } from "./api";
 
 export const FORM_LABELS: Record<FormKey, string> = {
@@ -31,14 +31,15 @@ const INTEREST_LABELS = Object.fromEntries(
   INTEREST_OPTIONS.map((option) => [option.value, option.label]),
 ) as Record<ContactAnswers["interest"], string>;
 
-export function trialPeriod(answers: TrialClassAnswers): string {
-  return `${WEEKDAY_LABELS[answers.weekday].full}, ${answers.hour} – ${periodEnd(answers.hour)}`;
+/** "Seg, Qua · 07h – 08h, 18h – 19h": the trial class preferences in one compact line. */
+export function trialPreferences(answers: TrialClassAnswers): string {
+  return `${formatWeekdayList(answers.weekdays, "short")} · ${formatShortPeriodList(answers.hours)}`;
 }
 
 /** A one-line summary of the lead's preference, for the list. */
 export function leadSummary(lead: LeadView): string {
   if (lead.form === "trial_class") {
-    return `Musculação · ${trialPeriod(lead.answers as TrialClassAnswers)}`;
+    return `Musculação · ${trialPreferences(lead.answers as TrialClassAnswers)}`;
   }
   const answers = lead.answers as ContactAnswers;
   const time = answers.preferredTime ?? FREE_TIME_LABEL;
@@ -51,8 +52,8 @@ export function leadAnswers(lead: LeadView): { question: string; answer: string 
     const answers = lead.answers as TrialClassAnswers;
     return [
       { question: "Modalidade", answer: "Musculação" },
-      { question: "Dia da semana", answer: WEEKDAY_LABELS[answers.weekday].full },
-      { question: "Horário", answer: `${answers.hour} – ${periodEnd(answers.hour)}` },
+      { question: "Dias de preferência", answer: formatWeekdayList(answers.weekdays) },
+      { question: "Horários de preferência", answer: formatPeriodList(answers.hours) },
     ];
   }
   const answers = lead.answers as ContactAnswers;
@@ -82,8 +83,8 @@ export function whatsappGreeting(lead: LeadView): string {
   const firstName = lead.name.split(" ")[0] ?? lead.name;
   if (lead.form === "trial_class") {
     const answers = lead.answers as TrialClassAnswers;
-    const day = WEEKDAY_LABELS[answers.weekday].full.toLowerCase();
-    return `Olá, ${firstName}! Aqui é da Pulso Concept. Recebemos seu pedido de aula experimental de musculação para ${day}, das ${answers.hour} às ${periodEnd(answers.hour)}. Podemos confirmar?`;
+    const days = formatWeekdayList(answers.weekdays).toLowerCase();
+    return `Olá, ${firstName}! Aqui é da Pulso Concept. Recebemos seu interesse em uma aula experimental de musculação, com preferência por ${days}, nos horários ${formatPeriodList(answers.hours)}. Vamos combinar o melhor dia para você?`;
   }
   return `Olá, ${firstName}! Aqui é da Pulso Concept. Recebemos seu contato pelo site e queremos agendar sua aula experimental. Qual o melhor dia para você?`;
 }

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test } from "bun:test";
 import type { Database } from "@pulso-concept/db";
+import type { TrialClassAnswers } from "@pulso-concept/forms";
 import { createAttemptLimiter } from "../../lib/attempts";
 import { createTestDb } from "../../test/setup";
 import {
@@ -28,28 +29,54 @@ beforeEach(async () => {
 
 describe("createTrialClassLead", () => {
   test("stores cleaned contact fields and the chosen period", async () => {
-    await createTrialClassLead(db, { ...person, weekday: "terca", hour: "07:00" });
+    await createTrialClassLead(db, { ...person, weekdays: ["terca"], hours: ["07:00"] });
     const [lead] = await listLeads(db);
     expect(lead).toMatchObject({
       form: "trial_class",
       name: "Maria da Silva",
       email: "maria@example.com",
       phone: "11912345678",
-      answers: { weekday: "terca", hour: "07:00" },
+      answers: { weekdays: ["terca"], hours: ["07:00"] },
       status: "new",
       paymentStatus: "pending",
       notes: "",
     });
   });
 
+  test("stores several days and periods, sorted and without repeats", async () => {
+    await createTrialClassLead(db, {
+      ...person,
+      weekdays: ["sexta", "segunda", "sexta"],
+      hours: ["18:00", "07:00", "07:00"],
+    });
+    const [lead] = await listLeads(db);
+    expect(lead?.answers).toEqual({ weekdays: ["segunda", "sexta"], hours: ["07:00", "18:00"] });
+  });
+
+  test("accepts the first and last periods of the day", async () => {
+    await createTrialClassLead(db, { ...person, weekdays: ["sabado"], hours: ["05:00", "20:00"] });
+    expect(await listLeads(db)).toHaveLength(1);
+  });
+
+  test("refuses an invalid email even if it passes the schema", async () => {
+    expect(
+      createTrialClassLead(db, {
+        ...person,
+        email: "maria@example.c",
+        weekdays: ["segunda"],
+        hours: ["06:00"],
+      }),
+    ).rejects.toThrow(InvalidLeadError);
+  });
+
   test("refuses a period when the studio is closed", async () => {
     expect(
-      createTrialClassLead(db, { ...person, weekday: "sabado", hour: "15:00" }),
+      createTrialClassLead(db, { ...person, weekdays: ["sabado"], hours: ["21:00"] }),
     ).rejects.toThrow(InvalidLeadError);
   });
 
   test("refuses an invalid phone or a blank name", async () => {
-    const answers = { weekday: "segunda", hour: "06:00" } as const;
+    const answers: TrialClassAnswers = { weekdays: ["segunda"], hours: ["06:00"] };
     expect(createTrialClassLead(db, { ...person, ...answers, phone: "1234" })).rejects.toThrow(
       InvalidLeadError,
     );
@@ -105,15 +132,15 @@ describe("listLeads", () => {
     await createTrialClassLead(db, {
       ...person,
       name: "Primeira",
-      weekday: "segunda",
-      hour: "06:00",
+      weekdays: ["segunda"],
+      hours: ["06:00"],
     });
     await Bun.sleep(5);
     await createTrialClassLead(db, {
       ...person,
       name: "Segunda",
-      weekday: "segunda",
-      hour: "06:00",
+      weekdays: ["segunda"],
+      hours: ["06:00"],
     });
     const result = await listLeads(db);
     expect(result.map((lead) => lead.name)).toEqual(["Segunda", "Primeira"]);
@@ -124,7 +151,11 @@ describe("listLeads", () => {
 
 describe("updateLead / deleteLead", () => {
   test("updates the pipeline status, payment and notes", async () => {
-    const { id } = await createTrialClassLead(db, { ...person, weekday: "quarta", hour: "12:00" });
+    const { id } = await createTrialClassLead(db, {
+      ...person,
+      weekdays: ["quarta"],
+      hours: ["12:00"],
+    });
     const updated = await updateLead(db, id, { status: "enrolled", paymentStatus: "paid" });
     expect(updated).toMatchObject({ status: "enrolled", paymentStatus: "paid", notes: "" });
     const noted = await updateLead(db, id, { notes: "Prefere WhatsApp" });
@@ -132,14 +163,22 @@ describe("updateLead / deleteLead", () => {
   });
 
   test("refuses an empty patch and unknown ids", async () => {
-    const { id } = await createTrialClassLead(db, { ...person, weekday: "quarta", hour: "12:00" });
+    const { id } = await createTrialClassLead(db, {
+      ...person,
+      weekdays: ["quarta"],
+      hours: ["12:00"],
+    });
     expect(updateLead(db, id, {})).rejects.toThrow(InvalidLeadError);
     expect(updateLead(db, MISSING_ID, { status: "lost" })).rejects.toThrow(LeadNotFoundError);
     expect(deleteLead(db, MISSING_ID)).rejects.toThrow(LeadNotFoundError);
   });
 
   test("deletes a response", async () => {
-    const { id } = await createTrialClassLead(db, { ...person, weekday: "quarta", hour: "12:00" });
+    const { id } = await createTrialClassLead(db, {
+      ...person,
+      weekdays: ["quarta"],
+      hours: ["12:00"],
+    });
     await deleteLead(db, id);
     expect(await listLeads(db)).toEqual([]);
   });

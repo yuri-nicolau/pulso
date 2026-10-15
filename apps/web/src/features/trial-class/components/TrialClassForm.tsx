@@ -1,112 +1,156 @@
 import {
+  isValidEmail,
   isValidPhone,
   periodEnd,
-  trialClassHours,
+  sortWeekdays,
+  trialClassHoursForDays,
   WEEKDAYS,
   type Weekday,
 } from "@pulso-concept/forms";
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, CalendarCheck2, Clock3, Loader2, MessageCircle } from "lucide-react";
-import { type FormEvent, useState } from "react";
+import { CalendarDays, Clock3, MessageCircle, PhoneCall } from "lucide-react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import marcaLaranja from "../../../assets/optimized/marca-laranja.png";
-import { PillGroup } from "../../../components/ui/PillGroup";
+import { ChipCheckboxGroup } from "../../../components/ui/ChipCheckboxGroup";
 import { TextField } from "../../../components/ui/TextField";
+import { formatEmailInput } from "../../../utils/email";
+import { formatPeriodList, shortPeriod } from "../../../utils/periods";
 import { formatPhoneInput } from "../../../utils/phone";
 import { submissionErrorMessage } from "../../../utils/submitLead";
-import { WEEKDAY_LABELS } from "../../../utils/weekdays";
+import { formatWeekdayList, WEEKDAY_LABELS } from "../../../utils/weekdays";
 import { getWhatsAppUrl } from "../../../utils/whatsapp";
 import { useSubmitTrialClass } from "../api";
+import { ConfirmSubmitButton, type SubmitPhase } from "./ConfirmSubmitButton";
 
 interface FormState {
   name: string;
   phone: string;
   email: string;
-  weekday: Weekday | "";
-  hour: string;
+  weekdays: Weekday[];
+  hours: string[];
 }
 
 type FieldErrors = Partial<Record<keyof FormState, string>>;
 
-const initialForm: FormState = { name: "", phone: "", email: "", weekday: "", hour: "" };
+const initialForm: FormState = { name: "", phone: "", email: "", weekdays: [], hours: [] };
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// How long the button's confirmation animation plays before the success state replaces the form.
+const CONFIRMATION_MS = 1600;
 
 const easeOut = [0.16, 1, 0.3, 1] as const;
 
+const FIELD_ERRORS = {
+  name: "Informe seu nome completo.",
+  phone: "Informe um celular ou telefone válido, com DDD.",
+  email: "Informe um e-mail válido, como nome@exemplo.com.",
+  weekdays: "Escolha pelo menos um dia.",
+  hours: "Escolha pelo menos um horário.",
+} as const;
+
+function validateField(field: keyof FormState, form: FormState): string | undefined {
+  switch (field) {
+    case "name":
+      return form.name.trim().length >= 2 ? undefined : FIELD_ERRORS.name;
+    case "phone":
+      return isValidPhone(form.phone) ? undefined : FIELD_ERRORS.phone;
+    case "email":
+      return isValidEmail(form.email) ? undefined : FIELD_ERRORS.email;
+    case "weekdays":
+      return form.weekdays.length > 0 ? undefined : FIELD_ERRORS.weekdays;
+    case "hours":
+      return form.hours.length > 0 ? undefined : FIELD_ERRORS.hours;
+  }
+}
+
 function validate(form: FormState): FieldErrors {
   const errors: FieldErrors = {};
-  if (form.name.trim().length < 2) errors.name = "Informe seu nome completo.";
-  if (!isValidPhone(form.phone)) errors.phone = "Informe um telefone com DDD.";
-  if (!EMAIL_PATTERN.test(form.email.trim())) errors.email = "Informe um e-mail válido.";
-  if (!form.weekday) errors.weekday = "Escolha o dia da semana.";
-  if (!form.hour) errors.hour = "Escolha o horário.";
+  for (const field of Object.keys(FIELD_ERRORS) as (keyof FormState)[]) {
+    const error = validateField(field, form);
+    if (error) errors[field] = error;
+  }
   return errors;
 }
 
-/** "06:00" → "06h – 07h", a short label that fits in three columns on mobile. */
-function shortPeriod(hour: string): string {
-  return `${hour.slice(0, 2)}h – ${periodEnd(hour).slice(0, 2)}h`;
-}
-
-interface ScheduledClass {
+interface SentRequest {
   firstName: string;
-  weekday: Weekday;
-  hour: string;
+  weekdays: Weekday[];
+  hours: string[];
 }
 
 export function TrialClassForm() {
   const [form, setForm] = useState<FormState>(initialForm);
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [scheduled, setScheduled] = useState<ScheduledClass | null>(null);
+  const [confirming, setConfirming] = useState(false);
+  const [sent, setSent] = useState<SentRequest | null>(null);
   const submit = useSubmitTrialClass();
-  const isSubmitting = submit.isPending;
+  const confirmTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  const hours = form.weekday ? trialClassHours(form.weekday) : [];
+  useEffect(() => () => clearTimeout(confirmTimer.current), []);
+
+  const busy = submit.isPending || confirming;
+  const phase: SubmitPhase = confirming ? "success" : submit.isPending ? "loading" : "idle";
+  // Before any day is picked, every period the studio offers on some day is shown.
+  const hourOptions = trialClassHoursForDays(form.weekdays.length > 0 ? form.weekdays : WEEKDAYS);
 
   function updateField<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [field]: value }));
     setErrors((current) => ({ ...current, [field]: undefined }));
   }
 
-  function handleWeekdayChange(value: string) {
-    const weekday = value as Weekday;
+  // Masked fields are checked when the person leaves them, so typos show up before sending.
+  function validateOnBlur(field: "name" | "phone" | "email") {
+    if (!form[field]) return;
+    setErrors((current) => ({ ...current, [field]: validateField(field, form) }));
+  }
+
+  function handleWeekdaysChange(values: string[]) {
+    const weekdays = sortWeekdays(values as Weekday[]);
+    const offered = trialClassHoursForDays(weekdays);
     setForm((current) => ({
       ...current,
-      weekday,
-      // Keep the time slot if it also exists on the new day (Saturday has fewer slots).
-      hour: trialClassHours(weekday).includes(current.hour) ? current.hour : "",
+      weekdays,
+      // Drop periods no chosen day offers (all days share the same hours today).
+      hours:
+        weekdays.length > 0
+          ? current.hours.filter((hour) => offered.includes(hour))
+          : current.hours,
     }));
-    setErrors((current) => ({ ...current, weekday: undefined, hour: undefined }));
+    setErrors((current) => ({ ...current, weekdays: undefined }));
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (busy) return;
 
-    // Honeypot: bots fill in hidden fields, humans don't.
+    // Honeypot: bots fill hidden fields, humans don't.
     if (new FormData(event.currentTarget).get("_honeypot")) return;
 
     const nextErrors = validate(form);
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0 || !form.weekday) return;
+    if (Object.keys(nextErrors).length > 0) return;
 
-    const weekday = form.weekday;
+    const request: SentRequest = {
+      firstName: form.name.trim().split(" ")[0] ?? "",
+      weekdays: form.weekdays,
+      hours: [...form.hours].sort(),
+    };
     submit.mutate(
       {
         name: form.name.trim(),
         phone: form.phone,
-        email: form.email.trim(),
-        weekday,
-        hour: form.hour,
+        email: form.email,
+        weekdays: request.weekdays,
+        hours: request.hours,
       },
       {
         onSuccess: () => {
-          setScheduled({
-            firstName: form.name.trim().split(" ")[0] ?? "",
-            weekday,
-            hour: form.hour,
-          });
-          setForm(initialForm);
+          setConfirming(true);
+          confirmTimer.current = setTimeout(() => {
+            setConfirming(false);
+            setSent(request);
+            setForm(initialForm);
+          }, CONFIRMATION_MS);
         },
       },
     );
@@ -119,7 +163,7 @@ export function TrialClassForm() {
       transition={{ duration: 0.7, ease: easeOut }}
       className="relative w-full max-w-xl overflow-hidden rounded-[2rem] bg-white shadow-premium"
     >
-      {/* Brand stripe at the top of the card. */}
+      {/* Brand stripe across the top of the card. */}
       <div className="h-1.5 w-full bg-gradient-to-r from-magenta-500 via-orange-500 to-orange-400" />
 
       <img
@@ -131,12 +175,12 @@ export function TrialClassForm() {
 
       <div className="relative px-5 py-8 sm:px-10 sm:py-10">
         <AnimatePresence mode="wait" initial={false}>
-          {scheduled ? (
+          {sent ? (
             <SuccessState
               key="success"
-              scheduled={scheduled}
+              request={sent}
               onReset={() => {
-                setScheduled(null);
+                setSent(null);
                 submit.reset();
               }}
             />
@@ -150,14 +194,14 @@ export function TrialClassForm() {
             >
               <span className="inline-flex items-center gap-2 rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-orange-900">
                 <span className="h-1.5 w-1.5 rounded-full bg-orange-500" aria-hidden="true" />
-                Aula experimental gratuita
+                Aula experimental
               </span>
               <h1 className="mt-4 font-display text-display-md font-medium text-ink">
-                Agende sua aula de musculação
+                Quando você quer treinar?
               </h1>
               <p className="mt-3 text-ink-muted">
-                Escolha o dia e o horário em que você quer treinar. Nossa equipe confirma tudo com
-                você pelo WhatsApp.
+                Conte os dias e horários de sua preferência para a aula experimental de musculação.
+                A equipe da Pulso Concept entra em contato para combinar tudo com você.
               </p>
 
               <form onSubmit={handleSubmit} noValidate className="mt-8 flex flex-col gap-5">
@@ -175,10 +219,12 @@ export function TrialClassForm() {
                   name="name"
                   autoComplete="name"
                   placeholder="Seu nome e sobrenome"
+                  maxLength={120}
                   value={form.name}
                   onChange={(event) => updateField("name", event.target.value)}
+                  onBlur={() => validateOnBlur("name")}
                   error={errors.name}
-                  disabled={isSubmitting}
+                  disabled={busy}
                 />
 
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -186,13 +232,15 @@ export function TrialClassForm() {
                     label="Telefone (WhatsApp)"
                     name="phone"
                     type="tel"
-                    inputMode="tel"
+                    inputMode="numeric"
                     autoComplete="tel-national"
                     placeholder="(11) 91234-5678"
+                    maxLength={15}
                     value={form.phone}
                     onChange={(event) => updateField("phone", formatPhoneInput(event.target.value))}
+                    onBlur={() => validateOnBlur("phone")}
                     error={errors.phone}
-                    disabled={isSubmitting}
+                    disabled={busy}
                   />
                   <TextField
                     label="E-mail"
@@ -200,67 +248,69 @@ export function TrialClassForm() {
                     type="email"
                     inputMode="email"
                     autoComplete="email"
-                    placeholder="voce@email.com"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    placeholder="nome@exemplo.com"
+                    maxLength={200}
                     value={form.email}
-                    onChange={(event) => updateField("email", event.target.value)}
+                    onChange={(event) => updateField("email", formatEmailInput(event.target.value))}
+                    onBlur={() => validateOnBlur("email")}
                     error={errors.email}
-                    disabled={isSubmitting}
+                    disabled={busy}
                   />
                 </div>
 
                 <fieldset className="m-0 border-0 p-0">
-                  <legend className="mb-2 flex items-center gap-2 text-sm font-medium text-ink">
-                    <CalendarCheck2 className="h-4 w-4 text-ink-muted" aria-hidden="true" />
-                    Dia da semana para treinar
+                  <legend className="mb-2 text-sm font-medium text-ink">
+                    <span className="flex items-center gap-2">
+                      <CalendarDays className="h-4 w-4 text-ink-muted" aria-hidden="true" />
+                      Dias de preferência
+                    </span>
+                    <span className="mt-0.5 block text-xs font-normal text-ink-muted">
+                      Escolha um ou mais.
+                    </span>
                   </legend>
-                  <PillGroup
-                    name="Dia da semana"
-                    tone="light"
+                  <ChipCheckboxGroup
                     className="grid grid-cols-3 gap-2 sm:grid-cols-6"
                     options={WEEKDAYS.map((weekday) => ({
                       value: weekday,
                       label: WEEKDAY_LABELS[weekday].short,
                       ariaLabel: WEEKDAY_LABELS[weekday].full,
                     }))}
-                    value={form.weekday}
-                    onChange={handleWeekdayChange}
-                    disabled={isSubmitting}
+                    values={form.weekdays}
+                    onChange={handleWeekdaysChange}
+                    disabled={busy}
                   />
-                  {errors.weekday && (
-                    <p className="mt-1.5 text-sm text-red-700">{errors.weekday}</p>
+                  {errors.weekdays && (
+                    <p className="mt-1.5 text-sm text-red-700">{errors.weekdays}</p>
                   )}
                 </fieldset>
 
                 <fieldset className="m-0 border-0 p-0">
-                  <legend className="mb-2 flex items-center gap-2 text-sm font-medium text-ink">
-                    <Clock3 className="h-4 w-4 text-ink-muted" aria-hidden="true" />
-                    Horário
-                    {form.weekday && (
-                      <span className="font-normal text-ink-muted">
-                        · {WEEKDAY_LABELS[form.weekday].full}
-                      </span>
-                    )}
+                  <legend className="mb-2 text-sm font-medium text-ink">
+                    <span className="flex items-center gap-2">
+                      <Clock3 className="h-4 w-4 text-ink-muted" aria-hidden="true" />
+                      Horários de preferência
+                    </span>
+                    <span className="mt-0.5 block text-xs font-normal text-ink-muted">
+                      Escolha um ou mais.
+                    </span>
                   </legend>
-                  <PillGroup
-                    name="Horário"
-                    tone="light"
+                  <ChipCheckboxGroup
                     className="grid grid-cols-3 gap-2 sm:grid-cols-4"
-                    options={hours.map((hour) => ({
+                    options={hourOptions.map((hour) => ({
                       value: hour,
                       label: shortPeriod(hour),
                       ariaLabel: `Das ${hour} às ${periodEnd(hour)}`,
                     }))}
-                    value={form.hour}
-                    onChange={(value) => updateField("hour", value)}
-                    disabled={isSubmitting}
-                    emptyMessage="Escolha um dia para ver os horários disponíveis."
+                    values={form.hours}
+                    onChange={(values) => updateField("hours", values)}
+                    disabled={busy}
                   />
-                  {errors.hour && form.weekday && (
-                    <p className="mt-1.5 text-sm text-red-700">{errors.hour}</p>
-                  )}
+                  {errors.hours && <p className="mt-1.5 text-sm text-red-700">{errors.hours}</p>}
                   <p className="mt-3 text-xs leading-relaxed text-ink-muted">
-                    Cada opção é um período de 1 hora. Sexta-feira vai até as 18h e sábado funciona
-                    só pela manhã. Não abrimos aos domingos.
+                    Cada opção é um período de 1 hora. Funcionamos das 5h às 21h, de segunda a
+                    sábado.
                   </p>
                 </fieldset>
 
@@ -270,29 +320,16 @@ export function TrialClassForm() {
                   </p>
                 )}
 
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="group mt-1 inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-4 text-base font-medium text-white transition-all duration-300 hover:bg-ink-soft hover:shadow-glow focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-70"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
-                      Enviando…
-                    </>
-                  ) : (
-                    <>
-                      Agendar aula experimental
-                      <ArrowRight
-                        className="h-5 w-5 text-orange-400 transition-transform duration-300 group-hover:translate-x-1"
-                        aria-hidden="true"
-                      />
-                    </>
-                  )}
-                </button>
+                <ConfirmSubmitButton
+                  phase={phase}
+                  idleLabel="Enviar minhas preferências"
+                  loadingLabel="Enviando…"
+                  successLabel="Preferências enviadas!"
+                />
 
-                <p className="text-center text-xs text-ink-muted">
-                  Ao enviar, você concorda em ser contatado pela equipe da Pulso Concept.
+                <p className="text-center text-xs leading-relaxed text-ink-muted">
+                  O envio não confirma a aula: a equipe da Pulso Concept vai entrar em contato para
+                  combinar o dia e o horário com você.
                 </p>
               </form>
             </motion.div>
@@ -304,14 +341,14 @@ export function TrialClassForm() {
 }
 
 interface SuccessStateProps {
-  scheduled: ScheduledClass;
+  request: SentRequest;
   onReset: () => void;
 }
 
-function SuccessState({ scheduled, onReset }: SuccessStateProps) {
-  const day = WEEKDAY_LABELS[scheduled.weekday].full.toLowerCase();
-  const period = `das ${scheduled.hour} às ${periodEnd(scheduled.hour)}`;
-  const whatsappMessage = `Olá! Acabei de agendar uma aula experimental de musculação pelo site para ${day}, ${period}.`;
+function SuccessState({ request, onReset }: SuccessStateProps) {
+  const days = formatWeekdayList(request.weekdays);
+  const periods = formatPeriodList(request.hours);
+  const whatsappMessage = `Olá! Acabei de enviar pelo site meu interesse em uma aula experimental de musculação. Tenho preferência por ${days.toLowerCase()}, nos horários ${periods}.`;
 
   return (
     <motion.div
@@ -324,20 +361,28 @@ function SuccessState({ scheduled, onReset }: SuccessStateProps) {
       <div className="relative flex h-20 w-20 items-center justify-center">
         <span className="absolute inset-0 rounded-full bg-orange-500/25 motion-safe:animate-ping" />
         <span className="relative flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-magenta-500 to-orange-500">
-          <CalendarCheck2 className="h-9 w-9 text-white" strokeWidth={1.75} aria-hidden="true" />
+          <PhoneCall className="h-9 w-9 text-white" strokeWidth={1.75} aria-hidden="true" />
         </span>
       </div>
 
       <h1 className="mt-6 font-display text-display-md font-medium text-ink">
-        {scheduled.firstName ? `Tudo certo, ${scheduled.firstName}!` : "Tudo certo!"}
+        {request.firstName ? `Recebemos, ${request.firstName}!` : "Recebemos!"}
       </h1>
       <p className="mt-3 max-w-sm text-ink-muted">
-        Recebemos seu pedido de aula experimental para{" "}
-        <strong className="font-semibold text-ink">
-          {day}, {period}
-        </strong>
-        . Em breve nossa equipe confirma com você pelo WhatsApp.
+        A equipe da Pulso Concept vai entrar em contato pelo WhatsApp para combinar o dia e o
+        horário da sua aula experimental.
       </p>
+
+      <dl className="mt-6 w-full divide-y divide-sand-200 rounded-2xl bg-sand-50 px-4 text-left text-sm">
+        <div className="flex items-baseline justify-between gap-4 py-3">
+          <dt className="shrink-0 text-ink-muted">Dias de preferência</dt>
+          <dd className="text-right font-medium text-ink">{days}</dd>
+        </div>
+        <div className="flex items-baseline justify-between gap-4 py-3">
+          <dt className="shrink-0 text-ink-muted">Horários</dt>
+          <dd className="text-right font-medium text-ink">{periods}</dd>
+        </div>
+      </dl>
 
       <div className="mt-8 flex w-full flex-col gap-3">
         <a
@@ -364,7 +409,7 @@ function SuccessState({ scheduled, onReset }: SuccessStateProps) {
           onClick={onReset}
           className="mt-1 text-sm font-medium text-ink-muted underline-offset-4 hover:text-ink hover:underline"
         >
-          Agendar para outra pessoa
+          Enviar para outra pessoa
         </button>
       </div>
     </motion.div>

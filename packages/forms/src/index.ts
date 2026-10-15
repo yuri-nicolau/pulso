@@ -33,24 +33,27 @@ export interface ContactAnswers {
   trainingType: ClassType;
 }
 
-// Trial class form (/aula-experimental): a weight training trial in a one-hour period.
+// Trial class form (/aula-experimental): the days and one-hour periods the person prefers for a
+// weight training trial. A preference, not a booking: the studio contacts them to schedule it.
 export interface TrialClassAnswers {
-  weekday: Weekday;
-  // Start of the one-hour period, "HH:00".
-  hour: string;
+  // In week order, no repeats.
+  weekdays: Weekday[];
+  // Starts of the one-hour periods ("HH:00"), in order, no repeats.
+  hours: string[];
 }
 
 export type LeadAnswers = ContactAnswers | TrialClassAnswers;
 
-// Weight training opening hours per day, as the first hour of each one-hour period offered.
-// Derived from the studio's class grid (first and last class of each day); keep in sync with it.
+// The studio's opening hours per day (05:00–21:00, Monday to Saturday; closed on Sundays), as
+// the first hour of each one-hour period offered: the last period is 20:00–21:00.
+const OPEN_ALL_DAY = { first: 5, last: 20 };
 const TRIAL_CLASS_HOUR_RANGES: Record<Weekday, { first: number; last: number }> = {
-  segunda: { first: 6, last: 19 },
-  terca: { first: 6, last: 19 },
-  quarta: { first: 6, last: 19 },
-  quinta: { first: 6, last: 19 },
-  sexta: { first: 6, last: 17 },
-  sabado: { first: 8, last: 9 },
+  segunda: OPEN_ALL_DAY,
+  terca: OPEN_ALL_DAY,
+  quarta: OPEN_ALL_DAY,
+  quinta: OPEN_ALL_DAY,
+  sexta: OPEN_ALL_DAY,
+  sabado: OPEN_ALL_DAY,
 };
 
 export function formatHour(hour: number): string {
@@ -67,17 +70,43 @@ export function isTrialClassHourAvailable(weekday: Weekday, hour: string): boole
   return trialClassHours(weekday).includes(hour);
 }
 
+// Every period offered on at least one of the days, in order: the choices once days are picked.
+export function trialClassHoursForDays(weekdays: readonly Weekday[]): string[] {
+  const hours = new Set(weekdays.flatMap((weekday) => trialClassHours(weekday)));
+  return [...hours].sort();
+}
+
+export function sortWeekdays(weekdays: readonly Weekday[]): Weekday[] {
+  return WEEKDAYS.filter((weekday) => weekdays.includes(weekday));
+}
+
 // "06:00" → "07:00": the end of a one-hour period.
 export function periodEnd(hour: string): string {
   return formatHour(Number(hour.slice(0, 2)) + 1);
 }
 
-// Brazilian phone numbers: digits only, with or without the 55 country code (10 to 13 digits).
+// Brazilian phone numbers, stored as digits only, with or without the 55 country code.
 export function normalizePhone(value: string): string {
   return value.replaceAll(/\D/g, "");
 }
 
+// A real Brazilian number: a valid area code (11–99, no zero digit), then a mobile (9 + 8 digits)
+// or a landline (2–5 + 7 digits). The 55 country code is optional.
 export function isValidPhone(value: string): boolean {
   const digits = normalizePhone(value);
-  return digits.length >= 10 && digits.length <= 13;
+  const local = digits.length > 11 && digits.startsWith("55") ? digits.slice(2) : digits;
+  return /^[1-9]{2}(9\d{8}|[2-5]\d{7})$/.test(local);
+}
+
+const EMAIL_PATTERN =
+  /^[a-z0-9](?:[a-z0-9._%+-]*[a-z0-9])?@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/;
+
+// Emails are kept lowercase and without spaces.
+export function normalizeEmail(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+export function isValidEmail(value: string): boolean {
+  const email = normalizeEmail(value);
+  return email.length <= 200 && !email.includes("..") && EMAIL_PATTERN.test(email);
 }
